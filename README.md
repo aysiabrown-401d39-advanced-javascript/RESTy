@@ -2,9 +2,9 @@
 ## Aysia Brown
 
 - Practice using React, and transferring user input to the state. 
+- [Sandbox](https://codesandbox.io/s/beautiful-merkle-icy3f)
 
 ### Start Up
-- `cd` into the `resty` directory 
 - make sure to run `npm i` for the dependencies 
 - run `npm start` 
 
