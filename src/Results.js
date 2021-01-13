@@ -6,7 +6,7 @@ class Results extends React.Component {
         return (
         <>
             <div id="print">
-                <p><b>{this.props.value}</b> {this.props.url}</p>
+                <p><b data-testid="method">{this.props.value}</b> {this.props.url}</p>
                 <h3>Headers:</h3>
                 <ReactJson src={this.props.headers} />
                 <h3>Body:</h3>

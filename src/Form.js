@@ -43,7 +43,7 @@ class Form extends React.Component {
     render() {
         return(
             <>
-            <form>
+            <form data-testid="form">
                 <label>API URL:</label>
                 <input onChange={this.handleURL} type="text"></input>
                 <select onChange={this.handleChange}>
