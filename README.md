@@ -9,4 +9,7 @@
 - run `npm start` 
 
 ### UML
-![UML](./resty/assets/RESTy.png)
+![UML](./resty/assets/RESTy.pn
+
+### References
+[Header.entries](https://developer.mozilla.org/en-US/docs/Web/API/Headers/entries)
