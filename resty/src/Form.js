@@ -1,5 +1,6 @@
 import React from 'react';
 import './Form.scss'
+import Results from './Results';
 
 class Form extends React.Component {
     constructor(props) {
@@ -9,46 +10,59 @@ class Form extends React.Component {
             value: 'GET',
             display: false,
         }
-        this.handleChange = this.handleChange.bind(this);
-        this.handleURL = this.handleURL.bind(this);
     }
 
-    handleChange(event) {
+    handleChange = (event) => {
         this.setState({value: event.target.value});
         this.setState({display: false})
     }
 
-    handleURL(event) {
+    handleURL = (event) => {
         this.setState({url: event.target.value});
     }
 
-    handleSubmit(event) {
+    handleSubmit =  async (event) => {
         this.setState({display: true})
-        event.preventDefault();
+        const url = this.state.url;
+        const api = await fetch(url, { method: this.state.value, mode: 'cors' })
+            .then(response => {
+                if(response.status !== 200) return;
+                return response.json();
+            });
+        this.props.giveResults(api.length, api.headers, api);
     }
+
+
 
     render() {
         return(
-            <div>
-                <form>
-                    <label>API URL:</label>
-                    <input onChange={this.handleURL} type="text"></input>
-                    <select onChange={this.handleChange}>
-                        <option value="GET">GET</option>
-                        <option value="POST">POST</option>
-                        <option value="PUT">PUT</option>
-                        <option value="DELETE">DELETE</option>
-                    </select>
-                    <input onClick={() => this.setState({display: true})} type="button" value="submit"></input>
-                </form>
-                {
-                    this.state.display
-                        ? (<div id="print">
-                            <p>{this.state.value} {this.state.url}</p>
-                        </div>)
-                        : null
-                }
-            </div>
+            <>
+            <form>
+                <label>API URL:</label>
+                <input onChange={this.handleURL} type="text"></input>
+                <select onChange={this.handleChange}>
+                    <option value="GET">GET</option>
+                    <option value="POST">POST</option>
+                    <option value="PUT">PUT</option>
+                    <option value="DELETE">DELETE</option>
+                </select>
+                <input onClick={this.handleSubmit} type="button" value="submit"></input>
+            </form>
+            {
+                this.state.display
+                ? (
+                    <Results 
+                    url = {this.state.url}
+                    value = {this.state.value}
+                    count = {this.props.count}
+                    headers = {this.props.headers}
+                    results = {this.props.results}
+                    />
+
+                ) : null 
+            }
+
+            </>
         )
     }
 }

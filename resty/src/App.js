@@ -8,8 +8,14 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      words: "empty words",
+      count: 0,
+      results: [],
+      headers: {}
     }
+  }
+
+  giveResults = (count, results, headers) => {
+    this.setState({count, results, headers});
   }
 
 
@@ -17,7 +23,11 @@ class App extends React.Component {
     return (
       <>
         <Header />
-        <Form />
+        <Form 
+          giveResults = {this.giveResults}
+          count = {this.state.count}
+          results = {this.state.results} 
+          headers = {this.state.headers}/>
         <Footer />
       </>
     )
