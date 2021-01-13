@@ -24,12 +24,18 @@ class Form extends React.Component {
     handleSubmit =  async (event) => {
         this.setState({display: true})
         const url = this.state.url;
+        let headers = [];
         const api = await fetch(url, { method: this.state.value, mode: 'cors' })
             .then(response => {
                 if(response.status !== 200) return;
+                for (let pair of response.headers.entries()) {
+                    let obj = {};
+                    obj[pair[0]] = pair[1];
+                    headers.push(obj);
+                  }     
                 return response.json();
             });
-        this.props.giveResults(api.length, api.headers, api);
+        this.props.giveResults(api.length, api, headers);
     }
 
 
@@ -58,7 +64,6 @@ class Form extends React.Component {
                     headers = {this.props.headers}
                     results = {this.props.results}
                     />
-
                 ) : null 
             }
 

@@ -15,10 +15,12 @@ class App extends React.Component {
   }
 
   giveResults = (count, results, headers) => {
-    this.setState({count, results, headers});
+    this.setState({
+      count, 
+      results, 
+      headers
+    });
   }
-
-
   render() {
     return (
       <>
