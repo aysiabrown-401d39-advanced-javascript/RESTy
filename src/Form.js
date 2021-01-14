@@ -1,6 +1,7 @@
 import React from 'react';
 import './Form.scss'
 import Results from './Results';
+import History from './History';
 
 class Form extends React.Component {
     constructor(props) {
@@ -9,6 +10,10 @@ class Form extends React.Component {
             url: '',
             value: 'GET',
             display: false,
+            queries: [],
+            errors: '',
+            body: {name:'', calories: 0, type: null},
+            loading: false,
         }
     }
 
@@ -22,40 +27,93 @@ class Form extends React.Component {
     }
 
     handleSubmit =  async (event) => {
-        this.setState({display: true})
+        this.setState({display: true, loading: true})
         const url = this.state.url;
         let headers = [];
-        const api = await fetch(url, { method: this.state.value, mode: 'cors' })
+        let options = { method: this.state.value, mode: 'cors'}
+        if(options.method == 'POST' || options.method == 'PUT') {
+            options.body = JSON.stringify(this.state.body);
+        }
+        console.log('options check', options);
+        const api = await fetch(url, options)
             .then(response => {
-                if(response.status !== 200) return;
-                for (let pair of response.headers.entries()) {
-                    let obj = {};
-                    obj[pair[0]] = pair[1];
-                    headers.push(obj);
-                  }     
-                return response.json();
+                if(response.status !== 200) {
+                    return response.text().then(text => {throw new Error(text)});
+                } else {
+                    this.state.errors = '';
+                    for (let pair of response.headers.entries()) {
+                        let obj = {};
+                        obj[pair[0]] = pair[1];
+                        headers.push(obj);
+                      }
+                    this.state.queries.push({url: this.state.url, method: this.state.value})
+                    localStorage.setItem('queries', JSON.stringify(this.state.queries))   
+                    this.setState({loading: false})  
+                    return response.json();
+                }
+
+            }).catch(e => {
+                this.state.errors = `${e}`;
+                this.setState({loading: true})
+                console.log(e);
             });
-        this.props.giveResults(api.length, api, headers);
+
+        this.props.giveResults(this.countAPI(api), api, headers);
+    }
+
+    countAPI = (api) => {
+        let count = 0;
+        for(var key in api) {
+            count++;
+        }
+        return count;
+    }
+
+    handleSameQuery = (value, url) => {
+        this.setState({value, url})
     }
 
 
+    handleBody = (event) => {
+        this.state.body[event.target.name] = event.target.value;
+    }
 
     render() {
         return(
             <>
             <form data-testid="form">
                 <label>API URL:</label>
-                <input onChange={this.handleURL} type="text"></input>
-                <select onChange={this.handleChange}>
+                <input placeholder={this.state.url} onChange={this.handleURL} type="text"></input>
+                <select value={this.state.value} onChange={this.handleChange}>
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
                     <option value="PUT">PUT</option>
                     <option value="DELETE">DELETE</option>
                 </select>
-                <input onClick={this.handleSubmit} type="button" value="submit"></input>
+                {
+                    this.state.value == 'POST' || this.state.value == 'PUT'
+                    ? (
+                    <>
+                        <label>NAME:</label>
+                        <input name="name" type="text" onChange={this.handleBody}></input>
+                        <label>CALORIES:</label>
+                        <input name="calories" type="text" onChange={this.handleBody}></input>
+                        <label>TYPE:</label>
+                        <select name="type" onChange={this.handleBody}>
+                            <option value ="FRUIT">FRUIT</option>
+                            <option value ="VEGETABLE">VEGETABLE</option>
+                            <option value="PROTEIN">PROTEIN</option>
+                        </select>
+                        
+                    </>
+                    )
+                    : null
+                }
+                 <input type="button" onClick={this.handleSubmit} value="submit"></input>
+                
             </form>
             {
-                this.state.display
+                this.state.display && this.state.url && !this.state.loading
                 ? (
                     <Results 
                     url = {this.state.url}
@@ -63,9 +121,15 @@ class Form extends React.Component {
                     count = {this.props.count}
                     headers = {this.props.headers}
                     results = {this.props.results}
+                    errors = {this.state.errors}
+                    loading = {this.state.loading}
                     />
-                ) : null 
+                ) : this.state.loading 
+                ? <p>Loading...</p>
+                : null
             }
+            <History
+            handleSameQuery = {this.handleSameQuery}/>
 
             </>
         )
