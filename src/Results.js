@@ -6,13 +6,22 @@ class Results extends React.Component {
         return (
         <>
             <div id="print">
-                <p><b data-testid="method">{this.props.value}</b> {this.props.url}</p>
-                <h3>Headers:</h3>
-                <ReactJson src={this.props.headers} />
-                <h3>Body:</h3>
-                <ReactJson src={this.props.results} />
-                <p></p>
-                <b>COUNT:</b> {this.props.count}
+                {
+                    this.props.errors
+                    ?
+                    (<p>{this.props.errors}</p>)
+                    : (
+                    <>
+                        <p><b data-testid="method">{this.props.value}</b> {this.props.url}</p>
+                        <h3>Headers:</h3>
+                        <ReactJson src={this.props.headers} />
+                        <h3>Body:</h3>
+                        <ReactJson src={this.props.results} />
+                        <p></p>
+                        <b>COUNT:</b> {this.props.count}
+                    </>
+                    )
+                }
             </div>
         </>
         )
