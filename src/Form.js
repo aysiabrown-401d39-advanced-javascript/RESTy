@@ -7,8 +7,8 @@ class Form extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            url: '',
-            value: 'GET',
+            url: this.props.url,
+            value: this.props.value,
             display: false,
             queries: [],
             errors: '',
@@ -24,6 +24,7 @@ class Form extends React.Component {
 
     handleURL = (event) => {
         this.setState({url: event.target.value});
+        this.setDisplay(false);
     }
 
     handleSubmit =  async (event) => {
@@ -45,20 +46,21 @@ class Form extends React.Component {
                         let obj = {};
                         obj[pair[0]] = pair[1];
                         headers.push(obj);
-                      }
-                    this.state.queries.push({url: this.state.url, method: this.state.value})
-                    localStorage.setItem('queries', JSON.stringify(this.state.queries))   
+                    }
                     this.setState({loading: false})  
                     return response.json();
                 }
 
             }).catch(e => {
                 this.state.errors = `${e}`;
-                this.setState({loading: true})
+                this.setState({loading: false})
                 console.log(e);
             });
-
-        this.props.giveResults(this.countAPI(api), api, headers);
+        if(api) {
+            this.state.queries.push({url: this.state.url, method: this.state.value, results: api});
+            localStorage.setItem('queries', JSON.stringify(this.state.queries));
+            this.props.giveResults(this.countAPI(api), api, headers);
+        }
     }
 
     countAPI = (api) => {
@@ -69,13 +71,17 @@ class Form extends React.Component {
         return count;
     }
 
-    handleSameQuery = (value, url) => {
-        this.setState({value, url})
-    }
-
 
     handleBody = (event) => {
         this.state.body[event.target.name] = event.target.value;
+    }
+
+    giveQuery = (value, url) => {
+        this.setState({value, url})
+    }
+
+    setDisplay = (display) => {
+        this.setState({display})
     }
 
     render() {
@@ -83,7 +89,7 @@ class Form extends React.Component {
             <>
             <form data-testid="form">
                 <label>API URL:</label>
-                <input placeholder={this.state.url} onChange={this.handleURL} type="text"></input>
+                <input value={this.state.url} onChange={this.handleURL} type="text"></input>
                 <select value={this.state.value} onChange={this.handleChange}>
                     <option value="GET">GET</option>
                     <option value="POST">POST</option>
@@ -129,7 +135,9 @@ class Form extends React.Component {
                 : null
             }
             <History
-            handleSameQuery = {this.handleSameQuery}/>
+            handleSameQuery = {this.giveQuery}
+            setDisplay = {this.setDisplay}
+            full = {false} />
 
             </>
         )
